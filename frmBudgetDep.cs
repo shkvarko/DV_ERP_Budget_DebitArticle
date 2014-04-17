@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq;
 
 namespace DebitArticle
 {
@@ -12,6 +13,7 @@ namespace DebitArticle
     {
         #region Переменные, Свойства, Константы
         UniXP.Common.CProfile m_objProfile;
+        List<ERP_Budget.Common.CUser> m_objUserList;
         #endregion
 
         public frmBudgetDep( UniXP.Common.CProfile objProfile )
@@ -19,6 +21,7 @@ namespace DebitArticle
             InitializeComponent();
 
             m_objProfile = objProfile;
+            m_objUserList = null;
             //m_bDREditRootDebitArticle = false;
             // проверка динамических прав
             SetAccessForDynamicRights();
@@ -221,13 +224,13 @@ namespace DebitArticle
             {
                 // необходимо получить список сотрудников
                 ERP_Budget.Common.CUser objUser = new ERP_Budget.Common.CUser();
-                ERP_Budget.Common.CBaseList<ERP_Budget.Common.CUser> objUserList = objUser.GetUserList( m_objProfile, true, false, false );
-                if( objUserList == null ) { return bRes; }
+                m_objUserList = objUser.GetBudgetUserList(m_objProfile, true, false, false);
+                if (m_objUserList == null) { return bRes; }
 
                 // заполняем набор данных, связанный с деревом
                 checklboxBudgetDepDclrn.Items.Clear();
                 dsDirect.Tables[ "dtUser" ].Rows.Clear();
-                System.Int32 iItemsCount = objUserList.GetCountItems();
+                System.Int32 iItemsCount = m_objUserList.Count();
                 if( iItemsCount > 0 )
                 {
                     System.Data.DataRow newRow = null;
@@ -235,7 +238,7 @@ namespace DebitArticle
 
                     for( System.Int32 i = 0; i< iItemsCount; i++ )
                     {
-                        objItem = objUserList.GetByIndex( i );
+                        objItem = m_objUserList[i];
 
                         if (objItem.DynamicRightsList.FindByName(ERP_Budget.Global.Consts.strDRManager).IsEnable == true)
                         {
@@ -1392,6 +1395,104 @@ namespace DebitArticle
             }
             return;
         }
+
+        private void FillChangesNodesList2(System.Data.DataTable dtChanges,
+            ERP_Budget.Common.CBaseList<ERP_Budget.Common.CBudgetDep> objList,
+            DevExpress.XtraTreeList.Nodes.TreeListNode objTreeNode)
+        {
+            try
+            {
+                if (dtChanges.Rows.Count == 0) { return; }
+                if (objTreeNode == null) { return; }
+                if (objList == null) { return; }
+
+                if (objTreeNode != null)
+                {
+                    // проверяем, числится ли узел в списке изменений
+                    foreach (System.Data.DataRow row in dtChanges.Rows)
+                    {
+                        if ((row.RowState == DataRowState.Added) || (row.RowState == DataRowState.Modified))
+                        {
+                            // добавленный или измененнная запись
+                            if (((System.Guid)row["BUDGETDEP_GUID_ID"]).CompareTo(((System.Guid)objTreeNode.GetValue(colGuid_ID))) == 0)
+                            {
+                                // узел числится в списке изменений
+                                // создаем объект "бюджетное подразделение" и добавляем его в список
+                                ERP_Budget.Common.CBudgetDep objBudgetDep = new ERP_Budget.Common.CBudgetDep();
+                                objBudgetDep.uuidID = (System.Guid)row["BUDGETDEP_GUID_ID"];
+                                if (row["BUDGETDEP_PARENT_GUID_ID"] != System.DBNull.Value)
+                                {
+                                    if (((System.Guid)row["BUDGETDEP_PARENT_GUID_ID"]).CompareTo(System.Guid.Empty) != 0)
+                                    { objBudgetDep.ParentID = (System.Guid)row["BUDGETDEP_PARENT_GUID_ID"]; }
+                                }
+                                objBudgetDep.State = row.RowState;
+                                objBudgetDep.Name = (System.String)row["BUDGETDEP_NAME"];
+                                ERP_Budget.Common.CUser objManager = new ERP_Budget.Common.CUser();
+                                objManager.ulID = (System.Int32)row["BUDGETDEP_MANAGER_ID"];
+                                objBudgetDep.Manager = objManager;
+
+                                // список сотрудников
+                                objBudgetDep.UsesrList.ClearList();
+                                if (row["BUDGETDEP_DECLRN"] != System.DBNull.Value)
+                                {
+                                    if (((System.String)objTreeNode.GetValue(colBudgetDeclrn)).Length > 0)
+                                    {
+                                        ERP_Budget.Common.CUser objUser = null;
+                                        // нужно разложить строку на состовляющие с именами сотрудников
+                                        System.String strUserList = (System.String)objTreeNode.GetValue(colBudgetDeclrn);
+                                        System.String strUserName = "";
+                                        System.String strAppendix = "";
+                                        System.Int32 iIndexOf = 0;
+                                        while (strUserList.Length > 0)
+                                        {
+                                            objUser = null;
+                                            iIndexOf = strUserList.IndexOf(";");
+                                            if (iIndexOf > 0)
+                                            {
+                                                strUserName = strUserList.Substring(0, strUserList.IndexOf(";"));
+                                            }
+                                            else
+                                            {
+                                                strUserName = strUserList;
+                                            }
+                                            objUser = GetUserByName(strUserName);
+                                            if (objUser != null)
+                                            {
+                                                objBudgetDep.UsesrList.AddItemToList(objUser);
+                                            }
+
+                                            strAppendix = "";
+                                            if (iIndexOf > 0)
+                                            {
+                                                //strAppendix = strUserList.Substring(iIndexOf + 1);
+                                                strAppendix = strUserList.Substring(iIndexOf + 1, (strUserList.Length - (iIndexOf + 1)));
+                                            }
+                                            else
+                                            {
+                                                strAppendix = "";
+                                            }
+                                            strUserList = strAppendix;
+                                        }
+
+                                    }
+                                }
+
+                                // добавляем объект "статья расходов" в список
+                                objList.AddItemToList(objBudgetDep);
+                            }
+                        }
+                    }
+                }
+
+            }
+            catch (System.Exception f)
+            {
+                System.Windows.Forms.MessageBox.Show(this, "Ошибка отмены изменений\n" + f.Message, "Ошибка",
+                   System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+            }
+            return;
+        }
+        
         /// <summary>
         /// Возвращает проинициализированный объект "Сотрудник" по его имени
         /// </summary>
@@ -1402,19 +1503,24 @@ namespace DebitArticle
             ERP_Budget.Common.CUser objRet = null;
             try
             {
-                if( dsDirect.Tables[ "dtUser" ].Rows.Count > 0 )
+                if (m_objUserList != null)
                 {
-                    foreach( System.Data.DataRow row in dsDirect.Tables[ "dtUser" ].Rows )
-                    {
-                        if( ( ( System.String )row[ "USER_NAME" ] ).CompareTo( strUserName ) == 0 )
-                        {
-                            objRet = new ERP_Budget.Common.CUser();
-                            objRet.ulID = ( System.Int32 )row[ "USER_ID" ];
-                            objRet.Name = ( System.String )row[ "USER_NAME" ];
-                            break;
-                        }
-                    }
+                    objRet = m_objUserList.SingleOrDefault<ERP_Budget.Common.CUser>(x => x.UserFullName == strUserName);
                 }
+                
+                //if( dsDirect.Tables[ "dtUser" ].Rows.Count > 0 )
+                //{
+                //    foreach( System.Data.DataRow row in dsDirect.Tables[ "dtUser" ].Rows )
+                //    {
+                //        if( ( ( System.String )row[ "USER_NAME" ] ).CompareTo( strUserName ) == 0 )
+                //        {
+                //            objRet = new ERP_Budget.Common.CUser();
+                //            objRet.ulID = ( System.Int32 )row[ "USER_ID" ];
+                //            objRet.Name = ( System.String )row[ "USER_NAME" ];
+                //            break;
+                //        }
+                //    }
+                //}
             }
             catch( System.Exception f )
             {
@@ -1439,7 +1545,10 @@ namespace DebitArticle
                 if( dtChanges == null ) { return objList; }
 
                 // заполняем список измененых узлов
-                FillChangesNodesList( dtChanges, objList, treeList.Nodes[ 0 ] );
+                FillChangesNodesList2( dtChanges, objList, treeList.FocusedNode );
+
+                //// заполняем список измененых узлов
+                //FillChangesNodesList(dtChanges, objList, treeList.Nodes[0]);
             }
             catch( System.Exception f )
             {

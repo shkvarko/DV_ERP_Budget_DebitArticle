@@ -205,8 +205,8 @@ namespace DebitArticle
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 32F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 32F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 152F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 148F));
             this.tableLayoutPanel2.Controls.Add(this.btnDown, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnLeft, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnSave, 6, 0);
@@ -248,9 +248,9 @@ namespace DebitArticle
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.Image = global::DebitArticle.Properties.Resources.disk_blue_ok;
-            this.btnSave.Location = new System.Drawing.Point(344, 4);
+            this.btnSave.Location = new System.Drawing.Point(346, 3);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(141, 24);
+            this.btnSave.Size = new System.Drawing.Size(141, 25);
             this.btnSave.TabIndex = 6;
             this.btnSave.Text = "Сохранить изменения";
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -259,9 +259,9 @@ namespace DebitArticle
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.Image = global::DebitArticle.Properties.Resources.undo;
-            this.btnCancel.Location = new System.Drawing.Point(494, 4);
+            this.btnCancel.Location = new System.Drawing.Point(494, 3);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(141, 24);
+            this.btnCancel.Size = new System.Drawing.Size(141, 25);
             this.btnCancel.TabIndex = 7;
             this.btnCancel.Text = "Отменить изменения";
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
