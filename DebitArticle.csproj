@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{22BDA2D1-FA05-4B39-8672-B9A908F8A1A1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DebitArticle</RootNamespace>
+    <AssemblyName>DebitArticle</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>UniXP.snk</AssemblyOriginatorKeyFile>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>http://localhost/DebitArticle/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>P:\IT отдел\UniXP\Dll\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>P:\IT отдел\UniXP\Dll\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.Data.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v7.2, Version=7.2.4.0, Culture=neutral, PublicKeyToken=9b171c9fd64da1d1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="EPPlus">
+      <HintPath>P:\IT отдел\UniXP\EPPlus.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ERP_Budget.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7483d705c8cfb03e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>P:\IT отдел\UniXP\Options Dll\ERP_Budget.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ERP_Budget.Global, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7483d705c8cfb03e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>P:\IT отдел\UniXP\Options Dll\ERP_Budget.Global.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>P:\IT отдел\UniXP\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UniXP.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7483d705c8cfb03e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>P:\IT отдел\UniXP\UniXP.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CDebitArticleDatabaseModel.cs" />
+    <Compile Include="CDebitArticleModuleInfo.cs" />
+    <Compile Include="frmBudgetDep.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBudgetDep.designer.cs">
+      <DependentUpon>frmBudgetDep.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmDebitArticle.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDebitArticle.Designer.cs">
+      <DependentUpon>frmDebitArticle.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmDebitArticleEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDebitArticleEditor.Designer.cs">
+      <DependentUpon>frmDebitArticleEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmImportDataInDebitArticleList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmImportDataInDebitArticleList.Designer.cs">
+      <DependentUpon>frmImportDataInDebitArticleList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ViewDebitArticle.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="UniXP.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="frmBudgetDep.resx">
+      <DependentUpon>frmBudgetDep.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDebitArticle.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmDebitArticle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDebitArticleEditor.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmDebitArticleEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmImportDataInDebitArticleList.resx">
+      <DependentUpon>frmImportDataInDebitArticleList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\document.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\document_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\add.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_up_blue.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_down_blue.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_left_blue.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_right_blue.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\add2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_down_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_left_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_right_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\arrow_up_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\refresh.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\delete2.png" />
+    <None Include="Resources\printer2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\undo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\disk_blue_ok.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\node_delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\node.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\node_add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_child.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_root.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_delete16_h.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IMAGES_BUDGETDEPSMALL_PNG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IMAGES_BUDGETDEP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IMAGES_BUDGETDEPSMALL.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\jar_add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\jar_add_clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\warning_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_child_2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_child_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_root_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_delete16_h_2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_child2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_add16_h_root2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\treenode_delete16_h2.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

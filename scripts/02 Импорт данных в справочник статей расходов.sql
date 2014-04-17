@@ -1,0 +1,737 @@
+USE [ERP_Budget]
+GO
+
+/****** Object:  Table [dbo].[T_Settings]    Script Date: 20.11.2013 10:15:32 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[T_Settings](
+	[Settings_Guid] [dbo].[D_GUID] NOT NULL,
+	[Settings_Name] [dbo].[D_NAME] NOT NULL,
+	[Settings_XML] [xml] NOT NULL,
+	[Settings_XMLSCHEME] [xml] NULL,
+	[Record_Updated] [dbo].[D_DATETIME] NULL,
+	[Record_UserUdpated] [dbo].[D_NAME] NULL,
+ CONSTRAINT [PK_T_Settings] PRIMARY KEY CLUSTERED 
+(
+	[Settings_Guid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+DECLARE @doc xml;
+
+SET @doc = '<ImportDataInDebitArticleSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ColumnItem TOOLS_ID="10" TOOLS_NAME="STARTROW" TOOLS_USERNAME="Начальная строка" TOOLS_DESCRIPTION="№ строки, с которой начинается импорт данных" TOOLS_VALUE="  2" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="11" TOOLS_NAME="ACCOUNTPLAN_1C_CODE" TOOLS_USERNAME="План счетов" TOOLS_DESCRIPTION="№ столбца с кодом из плана счетови" TOOLS_VALUE="1" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="12" TOOLS_NAME="BUDGETITEM_NUM" TOOLS_USERNAME="№ статьи расходов" TOOLS_DESCRIPTION="№ столбца с номером статьи расходовы" TOOLS_VALUE="2" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="13" TOOLS_NAME="BUDGETITEM_NAME" TOOLS_USERNAME="Наименование" TOOLS_DESCRIPTION="№ столбца с наименованием статьи расходов" TOOLS_VALUE="3" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="14" TOOLS_NAME="BUDGETDEP_NAME" TOOLS_USERNAME="Служба" TOOLS_DESCRIPTION="№ столбца с наименованием службы" TOOLS_VALUE="4" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="15" TOOLS_NAME="BUDGETEXPENSETYPE_NAME" TOOLS_USERNAME="Тип расходов" TOOLS_DESCRIPTION="№ столбца с наименованием типа расходов" TOOLS_VALUE="5" TOOLSTYPE_ID="1" />
+  <ColumnItem TOOLS_ID="16" TOOLS_NAME="BUDGETPROJECT_NAME" TOOLS_USERNAME="Проект" TOOLS_DESCRIPTION="№ столбца с наименованием проекта" TOOLS_VALUE="6" TOOLSTYPE_ID="1" />
+</ImportDataInDebitArticleSettings>';
+
+INSERT INTO [dbo].[T_Settings]( Settings_Guid, Settings_Name, Settings_XML, Record_Updated, Record_UserUdpated )
+VALUES( NEWID(), 'ImportDataInDebitArticleSettings', @doc, GETDATE(), 'Admin' );
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Возвращает настройки для импорта данных в справочник статей расходов
+--
+-- Входные параметры:
+--
+-- Выходные параметры:
+--
+--		@ERROR_NUM	- номер ошибки
+--		@ERROR_MES	- текст ошибки
+--
+-- Результат:
+--    0 - успешное завершение
+--    <>0 - ошибка запроса информации из базы данных
+
+CREATE PROCEDURE [dbo].[usp_GetSettingsForImportDataInDebitArticle] 
+  @ERROR_NUM int output,
+  @ERROR_MES nvarchar(4000) output
+AS
+
+BEGIN
+
+  SET @ERROR_NUM = 0;
+  SET @ERROR_MES = '';
+
+  BEGIN TRY
+
+    SELECT Top 1 Settings_Guid, Settings_Name, Settings_XML
+    FROM dbo.T_Settings
+    WHERE Settings_Name = 'ImportDataInDebitArticleSettings';
+
+	END TRY
+	BEGIN CATCH
+		SET @ERROR_NUM = ERROR_NUMBER();
+		SET @ERROR_MES = ERROR_MESSAGE();
+		RETURN @ERROR_NUM;
+	END CATCH;
+
+  IF( @ERROR_NUM = 0 )
+		SET @ERROR_MES = 'Успешное завершение операции.';
+		
+  RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[usp_GetSettingsForImportDataInDebitArticle] TO [public]
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_GetSettings]    Script Date: 20.11.2013 10:54:49 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+-- Возвращает список записей из ( dbo.T_Settings )
+--
+-- Входящие параметры:
+--
+-- Выходные параметры:
+--
+-- Результат:
+--    0 - успешное завершение
+--    <>0 - ошибка запроса информации из базы данных
+
+CREATE PROCEDURE [dbo].[sp_GetSettings] 
+  @ERROR_NUM int output,
+  @ERROR_MES nvarchar(4000) output
+AS
+
+BEGIN
+
+  SET @ERROR_NUM = 0;
+  SET @ERROR_MES = NULL;
+
+  BEGIN TRY
+
+    SELECT Settings_Guid, Settings_Name, Settings_XML, Settings_XMLSCHEME
+    FROM dbo.T_Settings
+    ORDER BY Settings_Name;
+
+	END TRY
+	BEGIN CATCH
+		SET @ERROR_NUM = ERROR_NUMBER();
+		SET @ERROR_MES = ERROR_MESSAGE();
+		RETURN @ERROR_NUM;
+	END CATCH;
+
+  SET @ERROR_NUM = 0;
+  SET @ERROR_MES = 'Успешное завершение операции.';
+  RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[sp_GetSettings] TO [public]
+GO
+
+
+/****** Object:  StoredProcedure [dbo].[sp_SetSetting]    Script Date: 20.11.2013 10:57:19 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+-- Изменяет значение Settings_XML ( dbo.T_Settings )
+--
+-- Входящие параметры:
+--  @Settings_Guid - уи настройки
+--  @Settings_XML - xml документ
+--
+--
+-- Выходные параметры:
+--
+-- Результат:
+--    0 - успешное завершение
+--    <>0 - ошибка запроса информации из базы данных
+
+CREATE PROCEDURE [dbo].[sp_SetSetting]
+  @Settings_Guid D_GUID,
+  @Settings_XML xml,
+   
+  @ERROR_NUM int output,
+  @ERROR_MES nvarchar(4000) output
+AS
+
+BEGIN
+
+  SET @ERROR_NUM = 0;
+  SET @ERROR_MES = '';
+
+  BEGIN TRY
+
+    IF NOT EXISTS( SELECT Settings_Guid FROM dbo.T_Settings WHERE Settings_Guid = @Settings_Guid )
+      BEGIN
+        SET @ERROR_NUM = 1;
+        SET @ERROR_MES = 'Не найдена настройка с указанным идентификатором.';
+        RETURN @ERROR_NUM;
+      END
+    
+    UPDATE dbo.T_Settings SET  Settings_XML = @Settings_XML WHERE Settings_Guid = @Settings_Guid; 
+    
+	END TRY
+	BEGIN CATCH
+		SET @ERROR_NUM = ERROR_NUMBER();
+		SET @ERROR_MES = ERROR_MESSAGE();
+		RETURN @ERROR_NUM;
+	END CATCH;
+
+  IF( @ERROR_NUM = 0 )
+		SET @ERROR_MES = 'Успешное завершение операции.';
+
+  RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[sp_SetSetting] TO [public]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[T_IMPORTDATA_DEBITARTICLE](
+	[ACCOUNTPLAN_1C_CODE] [dbo].[D_NAME] NOT NULL,
+	[BUDGETITEM_NUM] [dbo].[D_NAME] NOT NULL,
+	[BUDGETITEM_NAME] [dbo].[D_FULLNAME] NOT NULL,
+	[BUDGETDEP_NAME] [dbo].[D_NAME] NOT NULL,
+	[BUDGETEXPENSETYPE_NAME] [dbo].[D_NAME] NOT NULL,
+	[BUDGETPROJECT_NAME] [dbo].[D_NAME] NOT NULL,
+	DEBITARTICLE_ID D_ID NULL,
+	DEBITARTICLE_PARENTID D_ID NULL,
+	ACCOUNTPLAN_GUID D_GUID NULL,
+	BUDGETPROJECT_GUID D_GUID NULL,
+	BUDGETDEP_GUID D_GUID NULL,
+	BUDGETEXPENSETYPE_GUID D_GUID NULL,
+	IMPORTISOK bit NULL,
+	IMPORTRESULT_DESCRIPTION D_DESCRIPTION NULL
+
+) ON [PRIMARY]
+
+GO
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Добавление записи в таблицу T_IMPORTDATA_DEBITARTICLE
+--
+-- Входные параметры:
+--
+--		@ACCOUNTPLAN_1C_CODE		План счетов
+--		@BUDGETITEM_NUM					№ статьи расходов
+--		@BUDGETITEM_NAME				Наименование статьи расходов
+--		@BUDGETDEP_NAME					Служба
+--		@BUDGETEXPENSETYPE_NAME	Тип расходов
+--		@BUDGETPROJECT_NAME			Проект
+--
+-- Выходные параметры:
+--
+--  @ERROR_NUMBER						номер ошибки
+--  @ERROR_MESSAGE						сообщение об ошибке
+--
+-- Результат:
+--    0 - успешное завершение
+
+CREATE PROCEDURE [dbo].[usp_AddRowToImportDataDebitArticle] 
+	@DEBITARTICLE_ID				[dbo].[D_ID],
+	@ACCOUNTPLAN_1C_CODE		[dbo].[D_NAME],
+	@BUDGETITEM_NUM					[dbo].[D_NAME],
+	@BUDGETITEM_NAME				[dbo].[D_FULLNAME],
+	@BUDGETDEP_NAME					[dbo].[D_NAME],
+	@BUDGETEXPENSETYPE_NAME	[dbo].[D_NAME],
+	@BUDGETPROJECT_NAME			[dbo].[D_NAME],
+	@ACCOUNTPLAN_GUID				[dbo].[D_GUID] = NULL,
+	@BUDGETPROJECT_GUID			[dbo].[D_GUID] = NULL,
+	@BUDGETDEP_GUID					[dbo].[D_GUID] = NULL,
+	@BUDGETEXPENSETYPE_GUID [dbo].[D_GUID] = NULL,
+
+  @ERROR_NUM							int output,
+  @ERROR_MES							nvarchar(4000) output
+AS
+
+BEGIN
+  
+	SET @ERROR_NUM = 0;
+	SET @ERROR_MES = '';
+
+	BEGIN TRY
+		
+		INSERT INTO [dbo].[T_IMPORTDATA_DEBITARTICLE]( DEBITARTICLE_ID, ACCOUNTPLAN_1C_CODE, BUDGETITEM_NUM, BUDGETITEM_NAME, 
+			BUDGETDEP_NAME, BUDGETEXPENSETYPE_NAME, BUDGETPROJECT_NAME, ACCOUNTPLAN_GUID, BUDGETPROJECT_GUID, BUDGETDEP_GUID, BUDGETEXPENSETYPE_GUID )
+		VALUES( @DEBITARTICLE_ID, @ACCOUNTPLAN_1C_CODE, @BUDGETITEM_NUM, @BUDGETITEM_NAME, 
+			@BUDGETDEP_NAME, @BUDGETEXPENSETYPE_NAME, @BUDGETPROJECT_NAME, @ACCOUNTPLAN_GUID, @BUDGETPROJECT_GUID, @BUDGETDEP_GUID, @BUDGETEXPENSETYPE_GUID );
+
+	END TRY
+	BEGIN CATCH
+    SET @ERROR_NUM = ERROR_NUMBER();
+    SET @ERROR_MES = ERROR_MESSAGE();
+	END CATCH;
+
+	IF( @ERROR_NUM = 0 )
+		SET @ERROR_MES = 'Успешное завершение операции.';
+
+
+	RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[usp_AddRowToImportDataDebitArticle] TO [public]
+GO
+
+CREATE PROCEDURE [dbo].[usp_DeleteRowsFromImportDataDebitArticle] 
+  @ERROR_NUMBER						int output,
+  @ERROR_MESSAGE					nvarchar(4000) output
+AS
+
+BEGIN
+  
+	SET @ERROR_NUMBER = 0;
+	SET @ERROR_MESSAGE = '';
+
+	BEGIN TRY
+		
+		DELETE FROM [dbo].[T_IMPORTDATA_DEBITARTICLE];
+
+	END TRY
+	BEGIN CATCH
+    SET @ERROR_NUMBER = ERROR_NUMBER();
+    SET @ERROR_MESSAGE = ERROR_MESSAGE();
+	END CATCH;
+
+	IF( @ERROR_NUMBER = 0 )
+		SET @ERROR_MESSAGE = 'Успешное завершение операции.';
+
+
+	RETURN @ERROR_NUMBER;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[usp_DeleteRowsFromImportDataDebitArticle] TO [public]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- Удаляет статьи расходов указанного финансового периода
+--
+-- Входные параметры:
+--
+--  @BEGIN_DATE		начало периода
+--  @END_DATE			конец периода
+--
+-- Выходные параметры:
+--
+--		@ERROR_NUM		номер ошибки
+--		@ERROR_MES		текст ошибки
+--
+-- Результат:
+--    0 - успешное завершение
+--    <>0 - ошибка запроса информации из базы данных
+
+CREATE PROCEDURE [dbo].[usp_DeleteDebitArticlePeriod] 
+  @BEGIN_DATE			D_DATE,
+  @END_DATE				D_DATE,
+
+  @ERROR_NUM		int output,
+  @ERROR_MES	nvarchar(4000) output
+
+AS
+
+BEGIN
+  
+	SET @ERROR_NUM = 0;
+	SET @ERROR_MES = '';
+
+	BEGIN TRY
+
+		CREATE TABLE #FINANCILAPERIOD( DEBITARTICLE_GUID_ID uniqueidentifier );
+
+		INSERT INTO #FINANCILAPERIOD( DEBITARTICLE_GUID_ID )
+		SELECT DEBITARTICLE_GUID_ID
+		FROM [dbo].[T_DEBITARTICLE_PERIOD]
+		WHERE ( [BEGIN_DATE] >= @BEGIN_DATE ) AND ( [END_DATE] <= @END_DATE );
+
+		DELETE FROM dbo.T_DEBITARTICLEBUDGETDEP WHERE DEBITARTICLE_GUID_ID IN ( SELECT DEBITARTICLE_GUID_ID FROM #FINANCILAPERIOD );
+		
+		DELETE FROM dbo.T_DEBITARTICLE_PERIOD WHERE DEBITARTICLE_GUID_ID IN ( SELECT DEBITARTICLE_GUID_ID FROM #FINANCILAPERIOD );
+		
+		UPDATE [dbo].[T_BUDGETITEM] SET [DEBITARTICLE_GUID_ID] = NULL 
+		WHERE [DEBITARTICLE_GUID_ID] IS NOT NULL
+			AND DEBITARTICLE_GUID_ID IN ( SELECT DEBITARTICLE_GUID_ID FROM #FINANCILAPERIOD );
+    
+		DELETE FROM dbo.T_DEBITARTICLE WHERE GUID_ID IN ( SELECT DEBITARTICLE_GUID_ID FROM #FINANCILAPERIOD );
+
+		DROP TABLE #FINANCILAPERIOD;
+      
+	END TRY
+	BEGIN CATCH
+    SET @ERROR_NUM = ERROR_NUMBER();
+    SET @ERROR_MES = ERROR_MESSAGE();
+	END CATCH;
+
+  IF( @ERROR_NUM = 0 )
+		SET @ERROR_MES = 'Успешное завершение операции.';
+		
+  RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[usp_DeleteDebitArticlePeriod] TO [public]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Импорт данных в справочник статей расходов
+--
+-- Входящие параметры:
+-- 
+--  @BEGIN_DATE		начало периода
+--  @END_DATE			конец периода
+--
+-- Выходные параметры:
+--  @ERROR_NUM - номер ошибки
+--  @ERROR_MES - текст ошибки
+--
+-- Результат:
+--    0 - Успешное завершение
+--    <>0 - ошибка
+
+CREATE PROCEDURE [dbo].[usp_ImportDebitArticleList] 
+	@ClearDebitArticleperiod	D_BIT = 0,
+	@BEGIN_DATE								D_DATE,
+	@END_DATE									D_DATE,
+
+  @ERROR_NUM								int output,
+  @ERROR_MES								nvarchar(4000) output
+
+AS
+
+BEGIN
+
+	BEGIN TRY
+
+    SET @ERROR_NUM = 0;
+    SET @ERROR_MES = '';
+
+		BEGIN TRANSACTION UpdateData;
+
+		IF( @ClearDebitArticleperiod = 1 )
+			EXEC usp_DeleteDebitArticlePeriod @BEGIN_DATE = @BEGIN_DATE, @END_DATE = @END_DATE, 
+				@ERROR_NUM = @ERROR_NUM output, @ERROR_MES = @ERROR_MES output; 
+		
+		IF( @ERROR_NUM <> 0 )
+			BEGIN
+				ROLLBACK TRANSACTION UpdateData;
+				RETURN @ERROR_NUM;
+			END
+
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [DEBITARTICLE_PARENTID] = NULL, [IMPORTRESULT_DESCRIPTION] = '';
+
+		-- проверка на наличие ссылок
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = 0;
+		
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = -1, 
+			[IMPORTRESULT_DESCRIPTION] = 'Не найдена запись в справочнике "План счетов"' 
+		WHERE [ACCOUNTPLAN_GUID] IS NULL;
+		
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = -1, 
+			[IMPORTRESULT_DESCRIPTION] = 'Не найдена запись в справочнике "Проекты"' 
+		WHERE [BUDGETPROJECT_GUID] IS NULL;
+		
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = -1, 
+			[IMPORTRESULT_DESCRIPTION] = 'Не найдена запись в справочнике "Бюджетные подразделения"' 
+		WHERE [BUDGETDEP_GUID] IS NULL;
+		
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = -1,
+			[IMPORTRESULT_DESCRIPTION] = 'Не найдена запись в справочнике "Типы бюджетных расходов"' 
+		WHERE [BUDGETEXPENSETYPE_GUID] IS NULL;
+
+		-- регистрация статей расходов в справочнике
+		CREATE TABLE #DEBITARTICLE( DEBITARTICLE_NUM nvarchar(56), DEBITARTICLE_NAME nvarchar(128),  
+			DEBITARTICLE_ID int, PARENT_DEBITARTICLE_ID int, 
+			DEBITARTICLE_GUID uniqueidentifier, PARENT_DEBITARTICLE_GUID uniqueidentifier );
+		
+		DECLARE @BUDGETITEM_NUM	D_NAME;
+		DECLARE @BUDGETITEM_NAME	D_FULLNAME;
+		DECLARE @PREV_BUDGETITEM_NUM	D_NAME;
+		DECLARE @PARENT_BUDGETITEM_NUM	D_NAME;
+		DECLARE @DEBITARTICLE_ID D_ID;
+		DECLARE @PARENT_DEBITARTICLE_ID D_ID;
+		DECLARE @PREV_DEBITARTICLE_ID D_ID;
+
+		SET @BUDGETITEM_NUM	= NULL;
+		SET @BUDGETITEM_NAME = NULL;
+		SET @PREV_BUDGETITEM_NUM	= NULL;
+		SET @PARENT_BUDGETITEM_NUM	= NULL;
+		SET @PARENT_DEBITARTICLE_ID = NULL;
+		SET @PREV_DEBITARTICLE_ID = NULL;
+
+		DECLARE crSynch CURSOR FOR SELECT [BUDGETITEM_NUM], [BUDGETITEM_NAME], [DEBITARTICLE_ID]
+		FROM [dbo].[T_IMPORTDATA_DEBITARTICLE] WHERE [IMPORTISOK] = 0 ORDER BY [DEBITARTICLE_ID]
+		OPEN crSynch;
+		FETCH next FROM crSynch INTO @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID;
+		WHILE @@fetch_status = 0
+			BEGIN
+				IF( ( @PREV_BUDGETITEM_NUM IS NULL ) OR ( @PREV_BUDGETITEM_NUM <> @BUDGETITEM_NUM )  )
+					BEGIN
+						IF( Charindex( '.', @BUDGETITEM_NUM ) = 0 )
+							BEGIN
+								-- статья верхнего уровня
+								SET @PARENT_BUDGETITEM_NUM = NULL;
+								SET @PARENT_DEBITARTICLE_ID = NULL;
+
+								INSERT INTO #DEBITARTICLE( DEBITARTICLE_NUM, DEBITARTICLE_NAME, DEBITARTICLE_ID, PARENT_DEBITARTICLE_ID )
+								VALUES( @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID, NULL );
+							END
+						ELSE
+							BEGIN
+								-- подстатья
+								IF( Charindex( @PREV_BUDGETITEM_NUM, @BUDGETITEM_NUM ) > 0 )
+									BEGIN
+										-- новый дочерний уровень
+										SET @PARENT_BUDGETITEM_NUM = @PREV_BUDGETITEM_NUM;
+										SET @PARENT_DEBITARTICLE_ID = @PREV_DEBITARTICLE_ID;
+									END
+								ELSE
+									BEGIN
+										-- скорее всего, возврат на уровень вверх
+										SELECT TOP 1 @PARENT_BUDGETITEM_NUM = MAX( DEBITARTICLE_NUM ), @PARENT_DEBITARTICLE_ID = MAX( DEBITARTICLE_ID )
+										FROM #DEBITARTICLE
+										WHERE ( Charindex( ( DEBITARTICLE_NUM + '.' ), @BUDGETITEM_NUM ) = 1 );
+									END
+
+								INSERT INTO #DEBITARTICLE( DEBITARTICLE_NUM, DEBITARTICLE_NAME, DEBITARTICLE_ID, PARENT_DEBITARTICLE_ID )
+								VALUES( @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID, @PARENT_DEBITARTICLE_ID );
+							END
+						
+					END
+				
+				SET @PREV_BUDGETITEM_NUM = @BUDGETITEM_NUM;
+				SET @PREV_DEBITARTICLE_ID = @DEBITARTICLE_ID;
+
+				FETCH next FROM crSynch INTO @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID;
+			END
+		CLOSE crSynch;
+		DEALLOCATE crSynch;
+
+		-- определены подчинения у статей
+		-- производится поиск и регистрация статей в справочнике
+
+		DECLARE @DEBITARTICLE_NUM nvarchar(56); 
+		DECLARE @DEBITARTICLE_NAME nvarchar(128);
+		DECLARE @DEBITARTICLE_GUID uniqueidentifier;
+		DECLARE @PARENT_DEBITARTICLE_GUID uniqueidentifier;
+		DECLARE @ACCOUNTPLAN_GUID uniqueidentifier;
+		DECLARE @BUDGETDEP_GUID uniqueidentifier;
+		DECLARE @BUDGETEXPENSETYPE_GUID uniqueidentifier;
+		DECLARE @BUDGETPROJECT_GUID uniqueidentifier;
+
+		CREATE TABLE #DEBITARTICLE_2( DEBITARTICLE_NUM nvarchar(56), DEBITARTICLE_NAME nvarchar(128),  
+			DEBITARTICLE_ID int, PARENT_DEBITARTICLE_ID int, 
+			DEBITARTICLE_GUID uniqueidentifier, PARENT_DEBITARTICLE_GUID uniqueidentifier );
+
+		DECLARE crSynch CURSOR FOR SELECT DEBITARTICLE_NUM, DEBITARTICLE_NAME, [DEBITARTICLE_ID], PARENT_DEBITARTICLE_ID
+		FROM #DEBITARTICLE ORDER BY [DEBITARTICLE_ID]
+		OPEN crSynch;
+		FETCH next FROM crSynch INTO @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID, @PARENT_DEBITARTICLE_ID;
+		WHILE @@fetch_status = 0
+			BEGIN
+				SET @DEBITARTICLE_GUID = NULL;
+				SET @PARENT_DEBITARTICLE_GUID = NULL;
+
+				SELECT @ACCOUNTPLAN_GUID = [ACCOUNTPLAN_GUID], @BUDGETDEP_GUID = [BUDGETDEP_GUID], 
+					@BUDGETEXPENSETYPE_GUID = [BUDGETEXPENSETYPE_GUID], @BUDGETPROJECT_GUID = [BUDGETPROJECT_GUID]
+				FROM [dbo].[T_IMPORTDATA_DEBITARTICLE]
+				WHERE [DEBITARTICLE_ID] = @DEBITARTICLE_ID;
+
+				SELECT @DEBITARTICLE_GUID = DEBITARTICLE_GUID FROM #DEBITARTICLE_2 WHERE DEBITARTICLE_ID = @DEBITARTICLE_ID AND DEBITARTICLE_GUID IS NOT NULL;
+
+				IF( @DEBITARTICLE_GUID IS NULL )
+					-- поиск статьи по номеру, наименованию и финансовому периоду
+					SELECT @DEBITARTICLE_GUID = [GUID_ID], @PARENT_DEBITARTICLE_GUID = [PARENT_GUID_ID] FROM [dbo].[T_DEBITARTICLE]
+					WHERE [DEBITARTICLE_NUM] = @BUDGETITEM_NUM
+						AND [DEBITARTICLE_NAME] = @BUDGETITEM_NAME
+						AND [GUID_ID] IN ( SELECT [DEBITARTICLE_GUID_ID] FROM [dbo].[T_DEBITARTICLE_PERIOD] 
+															 WHERE [BEGIN_DATE] = @BEGIN_DATE AND [END_DATE] = @END_DATE );
+				
+				IF( @DEBITARTICLE_GUID IS NULL )
+					BEGIN
+						-- такая статья для указанного периода не зарегистрирована
+						IF( @PARENT_DEBITARTICLE_ID IS NOT NULL )
+							BEGIN
+								-- перед добавлением подстатьи необходимо найти её родителя
+								SELECT @PARENT_DEBITARTICLE_GUID = DEBITARTICLE_GUID FROM #DEBITARTICLE_2
+								WHERE DEBITARTICLE_ID = @PARENT_DEBITARTICLE_ID;
+
+								IF( @PARENT_DEBITARTICLE_GUID IS NULL ) 
+									BEGIN
+										-- должна быть ссылка на родительскую статью/подстатью
+										UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = -1, 
+											[IMPORTRESULT_DESCRIPTION] = 'Не найдена ссылка на родительскую статью' 
+										WHERE [DEBITARTICLE_ID] = @DEBITARTICLE_ID;
+									END
+								ELSE
+									BEGIN
+										SET @DEBITARTICLE_GUID = NEWID();
+										-- регистрация подстатьи
+										INSERT INTO dbo.T_DEBITARTICLE( GUID_ID, PARENT_GUID_ID, DEBITARTICLE_NAME, DEBITARTICLE_ID,
+											DEBITARTICLE_NUM, DEBITARTICLE_TRANSPORTREST, DEBITARTICLE_DONTCHANGE, ACCOUNTPLAN_GUID )
+										VALUES( @DEBITARTICLE_GUID, @PARENT_DEBITARTICLE_GUID, @BUDGETITEM_NAME, @DEBITARTICLE_ID, 
+											@BUDGETITEM_NUM, 1, 1, @ACCOUNTPLAN_GUID );
+									END
+							END
+						ELSE
+							BEGIN
+								-- статья верхнего уровня
+								SET @DEBITARTICLE_GUID = NEWID();
+								-- регистрация подстатьи
+								INSERT INTO dbo.T_DEBITARTICLE( GUID_ID, DEBITARTICLE_NAME, DEBITARTICLE_ID,
+									DEBITARTICLE_NUM, DEBITARTICLE_TRANSPORTREST, DEBITARTICLE_DONTCHANGE, ACCOUNTPLAN_GUID )
+								VALUES( @DEBITARTICLE_GUID, @BUDGETITEM_NAME, @DEBITARTICLE_ID, 
+									@BUDGETITEM_NUM, 1, 1, @ACCOUNTPLAN_GUID );
+							END
+
+						INSERT INTO #DEBITARTICLE_2( DEBITARTICLE_NUM, DEBITARTICLE_NAME,  
+							DEBITARTICLE_ID, PARENT_DEBITARTICLE_ID, DEBITARTICLE_GUID, PARENT_DEBITARTICLE_GUID )
+						VALUES( @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID, @PARENT_DEBITARTICLE_ID, 
+							@DEBITARTICLE_GUID, @PARENT_DEBITARTICLE_GUID );
+					END
+
+				IF( @DEBITARTICLE_GUID IS NOT NULL )
+					BEGIN
+						-- финансовый период
+						IF NOT EXISTS( SELECT [DEBITARTICLE_GUID_ID] FROM [dbo].[T_DEBITARTICLE_PERIOD] 
+													 WHERE [DEBITARTICLE_GUID_ID] = @DEBITARTICLE_GUID 
+														AND [BEGIN_DATE] = @BEGIN_DATE
+														AND [END_DATE] = @END_DATE )
+							INSERT INTO [dbo].[T_DEBITARTICLE_PERIOD]( DEBITARTICLE_GUID_ID, BEGIN_DATE, END_DATE )
+							VALUES( @DEBITARTICLE_GUID, @BEGIN_DATE, @END_DATE );
+						
+						-- статья - служба - тип расходов - проект
+						IF NOT EXISTS ( SELECT TOP 1 DEBITARTICLE_GUID_ID FROM dbo.T_DEBITARTICLEBUDGETDEP 
+							WHERE ( ( DEBITARTICLE_GUID_ID = @DEBITARTICLE_GUID ) AND ( BUDGETDEP_GUID_ID = @BUDGETDEP_GUID ) ) )
+							BEGIN
+								INSERT INTO dbo.T_DEBITARTICLEBUDGETDEP( DEBITARTICLE_GUID_ID, BUDGETDEP_GUID_ID, BUDGETEXPENSETYPE_GUID, BUDGETPROJECT_GUID )
+								VALUES( @DEBITARTICLE_GUID, @BUDGETDEP_GUID, @BUDGETEXPENSETYPE_GUID, @BUDGETPROJECT_GUID );
+							END
+						ELSE 
+							UPDATE dbo.T_DEBITARTICLEBUDGETDEP  SET BUDGETEXPENSETYPE_GUID = @BUDGETEXPENSETYPE_GUID, BUDGETPROJECT_GUID = @BUDGETPROJECT_GUID
+							WHERE DEBITARTICLE_GUID_ID = @DEBITARTICLE_GUID
+								AND BUDGETDEP_GUID_ID = @BUDGETDEP_GUID;
+						
+						UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET [IMPORTISOK] = 1,  [IMPORTRESULT_DESCRIPTION] = 'Успешное завершение импорта строки' 
+						WHERE [DEBITARTICLE_ID] = @DEBITARTICLE_ID;
+					
+					END
+
+				FETCH next FROM crSynch INTO @BUDGETITEM_NUM, @BUDGETITEM_NAME, @DEBITARTICLE_ID, @PARENT_DEBITARTICLE_ID;
+			END
+		CLOSE crSynch;
+		DEALLOCATE crSynch;
+
+		DROP  TABLE #DEBITARTICLE_2;
+		DROP  TABLE #DEBITARTICLE;
+
+		IF EXISTS( SELECT IMPORTISOK FROM [dbo].[T_IMPORTDATA_DEBITARTICLE] WHERE [IMPORTISOK] <> 1)
+			BEGIN
+				SET @ERROR_NUM = 1;
+				SET @ERROR_MES = 'Ошибка импорта данных.';
+			END
+		
+		UPDATE [dbo].[T_IMPORTDATA_DEBITARTICLE] SET IMPORTISOK = 0 WHERE [IMPORTISOK] <> 1;
+
+		SELECT ACCOUNTPLAN_1C_CODE, BUDGETITEM_NUM, BUDGETITEM_NAME, BUDGETDEP_NAME, BUDGETEXPENSETYPE_NAME, 
+			BUDGETPROJECT_NAME, DEBITARTICLE_ID, DEBITARTICLE_PARENTID, ACCOUNTPLAN_GUID, BUDGETPROJECT_GUID, 
+			BUDGETDEP_GUID, BUDGETEXPENSETYPE_GUID, IMPORTISOK, IMPORTRESULT_DESCRIPTION
+		FROM [dbo].[T_IMPORTDATA_DEBITARTICLE]
+		ORDER BY DEBITARTICLE_ID;
+
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION UpdateData;
+
+    SET @ERROR_NUM = ERROR_NUMBER();
+    SET @ERROR_MES = ERROR_MESSAGE();
+
+		RETURN @ERROR_NUM;
+	END CATCH;
+
+	IF( @ERROR_NUM = 0 )
+		BEGIN
+			COMMIT TRANSACTION UpdateData
+			SET @ERROR_MES = 'Успешное завершение операции.';
+		END
+	ELSE
+		ROLLBACK TRANSACTION UpdateData;
+
+	RETURN @ERROR_NUM;
+END
+
+GO
+GRANT EXECUTE ON [dbo].[usp_ImportDebitArticleList] TO [public]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[usp_DeleteRowsFromImportDataDebitArticle] 
+  @ERROR_NUM						int output,
+  @ERROR_MES					nvarchar(4000) output
+AS
+
+BEGIN
+  
+	SET @ERROR_NUM = 0;
+	SET @ERROR_MES = '';
+
+	BEGIN TRY
+		
+		DELETE FROM [dbo].[T_IMPORTDATA_DEBITARTICLE];
+
+	END TRY
+	BEGIN CATCH
+    SET @ERROR_NUM = ERROR_NUMBER();
+    SET @ERROR_MES = ERROR_MESSAGE();
+	END CATCH;
+
+	IF( @ERROR_NUM = 0 )
+		SET @ERROR_MES = 'Успешное завершение операции.';
+
+
+	RETURN @ERROR_NUM;
+END
+GO
