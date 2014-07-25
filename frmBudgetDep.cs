@@ -1545,10 +1545,10 @@ namespace DebitArticle
                 if( dtChanges == null ) { return objList; }
 
                 // заполняем список измененых узлов
-                FillChangesNodesList2( dtChanges, objList, treeList.FocusedNode );
+                //FillChangesNodesList2( dtChanges, objList, treeList.FocusedNode );
 
                 //// заполняем список измененых узлов
-                //FillChangesNodesList(dtChanges, objList, treeList.Nodes[0]);
+                FillChangesNodesList(dtChanges, objList, treeList.Nodes[0]);
             }
             catch( System.Exception f )
             {
